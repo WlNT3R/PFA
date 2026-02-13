@@ -8,8 +8,6 @@
 
 bool setQuadFormula(QuadFormula* qf, char* name)
 {
-	double x[];
-	double w[];
 	if(strcmp(name,"left") == 0){
 		qf->wk = [1];
 		qf->xk = [0];}
