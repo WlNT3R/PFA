@@ -8,40 +8,38 @@
 
 /* Initialize the integration variables.
    Arguments :
-   - quadrature : name of the quadrature formula that will be used. It can be "left", "right", 
-     "middle", "trapezes", "simpson", "gauss2" or "gauss3".
-   - dt : a positive value, which will be used to decide the number of subdivisions of an 
-          interval [a,b], when computing the integration.
-          The number of subdivisions will be N such that (b-a)/N ~ dt
+   - quadrature : name of the quadrature formula that will be used. It can be
+   "left", "right", "middle", "trapezes", "simpson", "gauss2" or "gauss3".
+   - dt : a positive value, which will be used to decide the number of
+   subdivisions of an interval [a,b], when computing the integration. The number
+   of subdivisions will be N such that (b-a)/N ~ dt
 */
-bool init_integration(char* quadrature, double dt)
-{ 
-  return true;
+bool init_integration(char *quadrature, double dt) {
+  pfa_dt = dt;
+  return setQuadFormula(&pfaQF, quadrature);
 }
-
-
 
 /* Density of the normal distribution */
-double phi(double x)
-{
-  return 0.398942280401433 * exp( -x*x/2 );
-}
+double phi(double x) { return 0.398942280401433 * exp(-x * x / 2); }
 
 /* Cumulative distribution function of the normal distribution */
-double PHI(double x)
-{
-  return 0.0;
-}
+double PHI(double x) { return 0.5 + integrate_dx(phi, 0, x, pfa_dt, &pfaQF); }
 
 /* =====================================
-   Finance function: price of an option 
+   Finance function: price of an option
 */
-double optionPrice(Option* option)
-{
-  return 0.0;
+double optionPrice(Option *option) {
+  double z0 = (log(option->K / option->S0) -
+               (option->mu - 0.5 * option->sig * option->sig) * option->T) /
+              option->sig * sqrt(option->T);
+  if (option->type == 0) {
+    return option->S0 * exp(option->mu * option->T) *
+           PHI((option->sig * sqrt(option->T) - z0) - option->K * PHI(-z0));
+  } else {
+    return option->K * PHI(z0) - option->S0 * exp(option->mu * option->T) *
+                                     PHI(z0 - option->sig * sqrt(option->T));
+  }
 }
-
-
 
 /* ===============================================*/
 /* Insurance functions */
@@ -49,50 +47,55 @@ double optionPrice(Option* option)
 /* Probability density function (PDF) of variable X.
    X is the reimbursement in case of a claim from the client.
 */
-double clientPDF_X(InsuredClient* client, double x)
-{
-  return 0.0;
+double clientPDF_X(InsuredClient *client, double x) {
+  if (x <= 0)
+    return 0.0; // pour le log(x) sinon ptit blem sah
+  return phi((log(x) - client->m) / client->s) / client->s * x;
 }
-
 
 /* Cumulative distribution function (CDF) of variable X.
    X is the reimbursement in case of a claim from the client.
 */
-double clientCDF_X(InsuredClient* client, double x)
-{
-  return 0.0;
+double clientCDF_X(InsuredClient *client, double x) {
+  if (x <= 0)
+    return 0.0;
+  return PHI((log(x) - client->m) / client->s);
 }
-
 
 /* Probability density function (PDF) of variable X1+X2.
-   X1 and X2 are the reimbursements of the two claims from the client (assuming there are 
-   two claims).
+   X1 and X2 are the reimbursements of the two claims from the client (assuming
+   there are two claims).
 */
-double clientPDF_X1X2(InsuredClient* client, double x)
-{
-  return 0.0;
+double clientPDF_X1X2(InsuredClient *client, double x) {
+  if (x <= 0)
+    return 0.0;
+  double f(double t) {
+    return clientPDF_X(client, x - t) * clientPDF_X(client, t);
+  }
+  return integrate_dx(f, 0, x, pfa_dt, &pfaQF);
 }
-
 
 /* Cumulative distribution function (CDF) of variable X1+X2.
-   X1 and X2 are the reimbursements of the two claims from the client (assuming there are 
-   two claims).
+   X1 and X2 are the reimbursements of the two claims from the client (assuming
+   there are two claims).
 */
-double clientCDF_X1X2(InsuredClient* client, double x)
-{
-  return 0.0;
+double clientCDF_X1X2(InsuredClient *client, double x) {
+  if (x <= 0)
+    return 0.0;
+  double f(double t) { return clientPDF_X1X2(client, t); }
+  return integrate_dx(f, 0, x, pfa_dt, &pfaQF);
 }
-
-
 
 /* Cumulative distribution function (CDF) of variable S.
-   Variable S is the sum of the reimbursements that the insurance company will pay to client.
+   Variable S is the sum of the reimbursements that the insurance company will
+   pay to client.
 */
-double clientCDF_S(InsuredClient* client, double x)
-{
-  return 0.0;
+double clientCDF_S(InsuredClient *client, double x) {
+  if (x < 0)
+    return 0.0;
+  else if (x == 0)
+    return client->p[0];
+  else
+    return client->p[0] + client->p[1] * clientCDF_X(client, x) +
+           client->p[2] * clientCDF_X1X2(client, x);
 }
-
-
-
-

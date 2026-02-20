@@ -5,8 +5,9 @@
 
 #include "pfa.h"
 
-/* Code here anything you want to test your pfa functions and to show your numerical results */
-int main()
-{
+/* Code here anything you want to test your pfa functions and to show your
+ * numerical results */
+int main() {
+  init_integration("simpson", 0.1);
   return 0;
 }

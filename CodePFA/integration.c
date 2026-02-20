@@ -13,24 +13,21 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->xk[0] = 0;
     qf->wk[0] = 1;
     return true;
-  }
-  if (strcmp(name, "right") == 0) {
+  } else if (strcmp(name, "right") == 0) {
     qf->n = 0;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
     qf->xk[0] = 1;
     qf->wk[0] = 1;
     return true;
-  }
-  if (strcmp(name, "mid") == 0) {
+  } else if (strcmp(name, "middle") == 0) {
     qf->n = 0;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
     qf->xk[0] = 0.5;
     qf->wk[0] = 1;
     return true;
-  }
-  if (strcmp(name, "trapeze") == 0) {
+  } else if (strcmp(name, "trapeze") == 0) {
     qf->n = 1;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
@@ -39,8 +36,7 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->wk[0] = 0.5;
     qf->wk[1] = 0.5;
     return true;
-  }
-  if (strcmp(name, "simpson") == 0) {
+  } else if (strcmp(name, "simpson") == 0) {
     qf->n = 2;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
@@ -51,8 +47,7 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->wk[1] = 2.0 / 3;
     qf->wk[2] = 1.0 / 6;
     return true;
-  }
-  if (strcmp(name, "gauss-2") == 0) {
+  } else if (strcmp(name, "gauss-2") == 0) {
     qf->n = 2;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
@@ -61,8 +56,7 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->wk[0] = 1.0 / 2;
     qf->wk[1] = 1.0 / 2;
     return true;
-  }
-  if (strcmp(name, "gauss-3") == 0) {
+  } else if (strcmp(name, "gauss-3") == 0) {
     qf->n = 3;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
@@ -73,8 +67,8 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->wk[1] = 4.0 / 9;
     qf->wk[2] = 5.0 / 18;
     return true;
-  }
-  return false;
+  } else
+    return false;
 }
 
 /* This function is not required ,but it may useful to debug */
