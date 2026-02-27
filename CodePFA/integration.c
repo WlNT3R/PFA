@@ -47,22 +47,22 @@ bool setQuadFormula(QuadFormula *qf, char *name) {
     qf->wk[1] = 2.0 / 3;
     qf->wk[2] = 1.0 / 6;
     return true;
-  } else if (strcmp(name, "gauss-2") == 0) {
+  } else if (strcmp(name, "gauss2") == 0) {
+    qf->n = 1;
+    qf->xk = malloc((qf->n + 1) * sizeof(double));
+    qf->wk = malloc((qf->n + 1) * sizeof(double));
+    qf->xk[0] = (1.0 / 2.0) - 1.0 / (2.0 * sqrt(3.0));
+    qf->xk[1] = (1.0 / 2.0) + 1.0 / (2.0 * sqrt(3.0));
+    qf->wk[0] = 1.0 / 2.0;
+    qf->wk[1] = 1.0 / 2.0;
+    return true;
+  } else if (strcmp(name, "gauss3") == 0) {
     qf->n = 2;
     qf->xk = malloc((qf->n + 1) * sizeof(double));
     qf->wk = malloc((qf->n + 1) * sizeof(double));
-    qf->xk[0] = 1.0 / 2 - 1.0 / 2 * sqrt(3);
-    qf->xk[1] = 1.0 / 2 + 1.0 / 2 * sqrt(3);
-    qf->wk[0] = 1.0 / 2;
-    qf->wk[1] = 1.0 / 2;
-    return true;
-  } else if (strcmp(name, "gauss-3") == 0) {
-    qf->n = 3;
-    qf->xk = malloc((qf->n + 1) * sizeof(double));
-    qf->wk = malloc((qf->n + 1) * sizeof(double));
-    qf->xk[0] = 1.0 / 2.0 * (1.0 - sqrt(3.0 / 5.0));
+    qf->xk[0] = (1.0 / 2.0) * (1.0 - sqrt(3.0 / 5.0));
     qf->xk[1] = 1.0 / 2.0;
-    qf->xk[2] = 1.0 / 2.0 * (1.0 + sqrt(3.0 / 5.0));
+    qf->xk[2] = (1.0 / 2.0) * (1.0 + sqrt(3.0 / 5.0));
     qf->wk[0] = 5.0 / 18;
     qf->wk[1] = 4.0 / 9;
     qf->wk[2] = 5.0 / 18;
