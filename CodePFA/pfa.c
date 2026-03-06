@@ -31,10 +31,10 @@ double PHI(double x) { return 0.5 + integrate_dx(phi, 0, x, pfa_dt, &pfaQF); }
 double optionPrice(Option *option) {
   double z0 = (log(option->K / option->S0) -
                (option->mu - 0.5 * option->sig * option->sig) * option->T) /
-              option->sig * sqrt(option->T);
+              (option->sig * sqrt(option->T));
   if (option->type == 0) {
     return option->S0 * exp(option->mu * option->T) *
-           PHI((option->sig * sqrt(option->T) - z0) - option->K * PHI(-z0));
+           PHI(option->sig * sqrt(option->T) - z0) - option->K * PHI(-z0);
   } else {
     return option->K * PHI(z0) - option->S0 * exp(option->mu * option->T) *
                                      PHI(z0 - option->sig * sqrt(option->T));
@@ -50,7 +50,7 @@ double optionPrice(Option *option) {
 double clientPDF_X(InsuredClient *client, double x) {
   if (x <= 0)
     return 0.0; // pour le log(x) sinon ptit blem sah
-  return phi((log(x) - client->m) / client->s) / client->s * x;
+  return phi((log(x) - client->m) / client->s) / (client->s * x);
 }
 
 /* Cumulative distribution function (CDF) of variable X.
@@ -62,6 +62,20 @@ double clientCDF_X(InsuredClient *client, double x) {
   return PHI((log(x) - client->m) / client->s);
 }
 
+static InsuredClient* localClient;
+static double localX;
+
+static double localProductPDF(double t)
+{
+  return clientPDF_X(localClient, localX - t) * clientPDF_X(localClient, t);
+}
+
+static double localPDF_X1X2(double x)
+{
+  localX = x;
+  return integrate_dx(localProductPDF, 0, x, pfa_dt, &pfaQF);
+}
+
 /* Probability density function (PDF) of variable X1+X2.
    X1 and X2 are the reimbursements of the two claims from the client (assuming
    there are two claims).
@@ -69,10 +83,8 @@ double clientCDF_X(InsuredClient *client, double x) {
 double clientPDF_X1X2(InsuredClient *client, double x) {
   if (x <= 0)
     return 0.0;
-  double f(double t) {
-    return clientPDF_X(client, x - t) * clientPDF_X(client, t);
-  }
-  return integrate_dx(f, 0, x, pfa_dt, &pfaQF);
+  localClient = client;
+  return localPDF_X1X2(x);
 }
 
 /* Cumulative distribution function (CDF) of variable X1+X2.
@@ -82,8 +94,8 @@ double clientPDF_X1X2(InsuredClient *client, double x) {
 double clientCDF_X1X2(InsuredClient *client, double x) {
   if (x <= 0)
     return 0.0;
-  double f(double t) { return clientPDF_X1X2(client, t); }
-  return integrate_dx(f, 0, x, pfa_dt, &pfaQF);
+  localClient = client;
+  return integrate_dx(localPDF_X1X2, 0, x, pfa_dt, &pfaQF);
 }
 
 /* Cumulative distribution function (CDF) of variable S.
